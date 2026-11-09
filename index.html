@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidad C. Santa Rosa de Colquijirca - Control de Asistencia QR</title>
+    <!-- ✅ Ruta CORREGIDA -->
+    <link rel="stylesheet" href="./css/estilos.css">
+</head>
+<body>
+    <div class="contenedor-principal">
+        <header class="cabecera">
+            <h1>Comunidad C. Santa Rosa de Colquijirca</h1>
+            <h2>Sistema de Control de Asistencia con Código QR</h2>
+        </header>
+
+        <nav class="menu-principal">
+            <div class="opcion-menu" onclick="mostrarSeccion('grupos')">
+                <h3>📋 Administrar Grupos</h3>
+                <p>Registrar y gestionar comuneros</p>
+            </div>
+            <div class="opcion-menu" onclick="mostrarSeccion('tarjetas')">
+                <h3>💳 Imprimir Tarjetas QR</h3>
+                <p>Generar credenciales con código QR</p>
+            </div>
+            <div class="opcion-menu" onclick="mostrarSeccion('asistencia')">
+                <h3>📷 Registrar Asistencia</h3>
+                <p>Escanear códigos y registrar presencia</p>
+            </div>
+            <div class="opcion-menu" onclick="mostrarSeccion('reportes')">
+                <h3>📊 Ver Reportes</h3>
+                <p>Historial y exportar a Excel</p>
+            </div>
+        </nav>
+
+        <section id="seccion-grupos" class="seccion oculto">
+            <div class="barra-superior">
+                <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+                <h2>Administrar Grupos de Comuneros</h2>
+            </div>
+            
+            <div class="formulario-registro">
+                <h3>Registrar Nuevo Comunero</h3>
+                <form id="form-comunero">
+                    <div class="campo">
+                        <label>Nombre Completo:</label>
+                        <input type="text" id="nombre-completo" required>
+                    </div>
+                    <div class="campo">
+                        <label>DNI:</label>
+                        <input type="text" id="dni-comunero" maxlength="8" required>
+                    </div>
+                    <div class="campo">
+                        <label>Nivel de Obligación:</label>
+                        <select id="tipo-comunero" required>
+                            <option value="">Seleccione...</option>
+                            <option value="Activo">Comunero Activo</option>
+                            <option value="Pasivo">Comunero Pasivo</option>
+                            <option value="Exonerado">Comunero Exonerado</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Número de Celular:</label>
+                        <input type="tel" id="celular-comunero" maxlength="9" required>
+                    </div>
+                    <button type="submit" class="btn-primario">Guardar Comunero</button>
+                </form>
+            </div>
+
+            <div class="lista-registrados">
+                <h3>Comuneros Registrados (<span id="total-comuneros">0</span>)</h3>
+                <div id="lista-comuneros"></div>
+            </div>
+        </section>
+
+        <section id="seccion-tarjetas" class="seccion oculto">
+            <div class="barra-superior">
+                <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+                <h2>Tarjetas de Identificación QR</h2>
+            </div>
+            <div class="acciones-tarjetas">
+                <button class="btn-primario" onclick="generarTodasTarjetas()">🔄 Generar Todas las Tarjetas</button>
+                <button class="btn-secundario" onclick="imprimirTarjetas()">🖨️ Imprimir Tarjetas</button>
+            </div>
+            <div id="contenedor-tarjetas" class="contenedor-tarjetas"></div>
+        </section>
+
+        <section id="seccion-asistencia" class="seccion oculto">
+            <div class="barra-superior">
+                <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+                <h2>Registro de Asistencia con QR</h2>
+            </div>
+            
+            <div class="control-camara">
+                <label>Seleccionar Cámara:</label>
+                <select id="selector-camara"></select>
+                <button id="btn-iniciar-camara" class="btn-primario">▶ Activar Cámara</button>
+                <button id="btn-detener-camara" class="btn-peligro" style="display:none;">⏹ Detener Cámara</button>
+            </div>
+            
+            <div id="visor-camara" class="visor-camara"></div>
+            <p id="estado-escaneo" class="estado-escaneo">Esperando iniciar cámara...</p>
+
+            <h3>Lista de Asistencia</h3>
+            <div class="tabla-contenedor">
+                <table id="tabla-asistencia">
+                    <thead>
+                        <tr>
+                            <th>DNI</th>
+                            <th>Nombre Completo</th>
+                            <th>Asistencia</th>
+                            <th>Nivel de Obligación</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-asistencia"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="seccion-reportes" class="seccion oculto">
+            <div class="barra-superior">
+                <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+                <h2>Reportes de Asistencia</h2>
+            </div>
+            
+            <div class="filtros-reporte">
+                <label>Filtrar por Nivel de Obligación:</label>
+                <select id="filtro-tipo">
+                    <option value="Todos">Todos</option>
+                    <option value="Activo">Activos</option>
+                    <option value="Pasivo">Pasivos</option>
+                    <option value="Exonerado">Exonerados</option>
+                </select>
+                <button class="btn-primario" onclick="aplicarFiltro()">Aplicar Filtro</button>
+                <button class="btn-excel" onclick="exportarExcel()">📥 Exportar a Excel</button>
+            </div>
+
+            <div class="tabla-contenedor">
+                <table id="tabla-reportes">
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>DNI</th>
+                            <th>Nombre Completo</th>
+                            <th>Nivel de Obligación</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-reportes"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="libs/qrcode.min.js"></script>
+    <script src="libs/html5-qrcode.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/grupos.js"></script>
+    <script src="js/tarjetas-qr.js"></script>
+    <script src="js/asistencia.js"></script>
+    <script src="js/reportes.js"></script>
+</body>
+</html>
